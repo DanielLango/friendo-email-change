@@ -9,31 +9,37 @@
   <div style="max-width:560px;margin:48px auto;padding:24px;">
     <h1 style="margin:0 0 8px 0;">📧 Confirm email change</h1>
     <p id="status" style="color:#444;margin:0 0 18px 0;">Checking link…</p>
-
     <div id="done" style="display:none;">
       <p style="color:#137333;font-weight:600;">
         ✅ Your email address has been updated.
       </p>
-
       <p style="margin-top:12px;">
         You can now return to the app and log in.
       </p>
     </div>
   </div>
-
   <script type="module">
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-    // ⚠️ FILL THESE
-    const SUPABASE_URL = "https://cgchcwqtevbybjxibamz.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNnY2hjd3F0ZXZieWJqeGliYW16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEyMzY4ODksImV4cCI6MjA3NjgxMjg4OX0.2s1i2-cWPsjdnxcK0eijKJESp-AY08MNSWRIQSeLwKs";
-
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
     const qs = new URLSearchParams(window.location.search);
+    const server = qs.get("server");
+
+    const SERVERS = {
+      eu: {
+        url: "https://fhjjtnwugukxdyvrfhld.supabase.co",
+        key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoamp0bnd1Z3VreGR5dnJmaGxkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1Nzc5MzYsImV4cCI6MjA4NjE1MzkzNn0.gbh71wEjnswXNsCejnFWIhR-lyB7JszSF3yNsBNWrOA"
+      },
+      us: {
+        url: "https://cgchcwqtevbybjxibamz.supabase.co",
+        key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNnY2hjd3F0ZXZieWJqeGliYW16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEyMzY4ODksImV4cCI6MjA3NjgxMjg4OX0.2s1i2-cWPsjdnxcK0eijKJESp-AY08MNSWRIQSeLwKs"
+      }
+    };
+
+    const config = SERVERS[server] || SERVERS.us;
+    const supabase = createClient(config.url, config.key);
+
     const token_hash = qs.get("token_hash");
     const type = qs.get("type");
-
     const statusEl = document.getElementById("status");
     const doneEl = document.getElementById("done");
 
@@ -48,7 +54,6 @@
       doneEl.style.display = "block";
     }
 
-    // Verify email change
     if (type !== "email_change" || !token_hash) {
       fail("Invalid or missing link. Please request email change again.");
     } else {
@@ -56,7 +61,6 @@
         type: "email_change",
         token_hash
       });
-
       if (error) {
         console.error(error);
         fail("Link expired or invalid. Please try again.");
